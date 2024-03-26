@@ -26,6 +26,7 @@ export default function SignUp() {
       const data = await res.json();
       if (data.success === false) {
         //Server side error
+        setLoading(false); //This is my edit
         return setErrorMessage(data.message);
       }
       setLoading(false);
@@ -49,7 +50,10 @@ export default function SignUp() {
             </span>
             Blog
           </Link>
-          <p className="text-sm mt-5">Welcome to my blog page!</p>
+          <p className="text-sm mt-5">
+            Welcome to my blog page! You can sign up with your credentials or
+            with Google
+          </p>
         </div>
         {/*right*/}
         <div className="flex-1">

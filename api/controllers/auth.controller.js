@@ -57,4 +57,41 @@ const signin = async (req, res, next) => {
 
 }
 
-module.exports = {signup, signin};
+const google = async (req, res, next) => {
+    const {email, name, googlePhotoURL} = req.body;
+    try{
+        const user = await User.findOne({email});
+        if(user){
+            const token = jwt.sign({id:user._id}, process.env.JWT_SECRET);
+            const {password, ...rest} = user._doc;
+            res.status(200).cookie('access_token', token, {
+                httpOnly: true,
+            }).json(rest);
+        }
+        else{
+            //Generating random password if user is signing in with Google, it can be changed later by user
+            const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+            const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+            const newUser = new User({
+                //Doing below operation to avoid 2 people having same username. Aditya Mishra => adityamishra4098
+                username: name.toLowerCase().split(' ').join('') + Math.random().toString(9).slice(-4),
+                email,
+                password: hashedPassword,
+                profilePicture: googlePhotoURL,
+
+            });
+            await newUser.save();
+            const token = jwt.sign({id:newUser._id}, process.env.JWT_SECRET);
+            const {password, ...rest} = newUser._doc;
+            res.status(200).cookie('access_token', token, {
+                httpOnly: true,
+            }).json(rest);
+        }
+
+    }
+    catch(error){
+        next(error);
+    }
+}
+
+module.exports = {signup, signin, google};

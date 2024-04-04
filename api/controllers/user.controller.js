@@ -72,5 +72,48 @@ const signout = (req, res, next) => {
     }
 }
 
-module.exports = {test, updateUser, deleteUser, signout};
+const getUsers = async (req, res, next) => {
+    if(!req.user.isAdmin){
+        return(next(errorHandler(403, "You do not have access to all user data")));
+    }
+
+    try{
+        const startIndex = parseInt(req.query.startIndex) || 0;
+        const limit = parseInt(req.query.limit) || 9;
+        const sortDirection = req.query.sort ==='asc' ? 1 : -1;
+
+        const users = await User.find().sort({updatedAt:sortDirection}).skip(startIndex).limit(limit);
+
+        const usersWithoutPassword = users.map((user) => {
+            const {password, ...rest} = user._doc
+            return rest;
+        });
+
+        const totalUsers = await User.countDocuments();
+
+        const now = new Date();
+
+        const oneMonthAgo = new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            now.getDate(),
+        )
+
+        const lastMonthUsers = await User.countDocuments({
+            createdAt:{$gte:oneMonthAgo}
+        })
+
+        res.status(200).json({
+            usersWithoutPassword,
+            totalUsers,
+            lastMonthUsers,
+        })
+
+    }
+    catch(error){
+        next(error);
+    }
+}
+
+module.exports = {test, updateUser, deleteUser, signout, getUsers};
 

@@ -104,7 +104,7 @@ const getUsers = async (req, res, next) => {
         })
 
         res.status(200).json({
-            usersWithoutPassword,
+            users:usersWithoutPassword,
             totalUsers,
             lastMonthUsers,
         })

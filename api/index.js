@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const userRoutes = require('./routes/user.route.js')
 const authRoutes = require('./routes/auth.route.js')
 const postRoutes = require('./routes/post.route.js')
+const commentRoutes = require('./routes/comment.route.js')
 const cookieParser = require('cookie-parser');
 
 dotenv.config();
@@ -29,6 +30,7 @@ app.listen(3000, ()=>{
 app.use('/api/user', userRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/post', postRoutes)
+app.use('/api/comment', commentRoutes)
 
 app.use((err, req, res, next)=>{
     const statusCode = err.statusCode || 500;
